@@ -137,6 +137,14 @@ class LocalBrowserTest(unittest.TestCase):
                             for cookie in data['cookies']))
         self.assertIn('local article', data['textContent'])
 
+        replay = self.client.post('/api/article', json={
+            'url': f'http://127.0.0.1:{port}/auth',
+            'cookies': data['cookies'], 'return-cookies': True,
+            'http-credentials': {'username': 'reader', 'password': 'redacted'},
+        })
+        self.assertEqual(replay.status_code, 200)
+        self.assertIn('session=rotated', self.observed['requests'][-1]['cookie'])
+
     def test_commit_waits_for_main_document_response_with_timeout_disabled(self):
         port = self.http.server_address[1]
         started = time.monotonic()

@@ -131,6 +131,16 @@ class CookieMappingTest(unittest.TestCase):
         self.assertEqual(cookies[1]['name'], 'b')
         self.assertNotIn('Cookie', cookies[1])
 
+    def test_replayed_browser_cookie_preserves_host_only_scope_without_source_scheme(self):
+        params = article.cookies_to_cdp([{
+            'name': 'session', 'value': 'placeholder', 'domain': 'api.example.test',
+            'path': '/', 'hostOnly': True, 'secure': True,
+            'sourceScheme': 'Secure', 'sourcePort': 443,
+        }], 'https://www.example.test/product')
+        self.assertEqual(params[0]['url'], 'https://api.example.test/')
+        self.assertNotIn('domain', params[0])
+        self.assertNotIn('sourceScheme', params[0])
+
     def test_export_keeps_duplicate_cookie_names(self):
         driver = MagicMock()
         driver.execute_cdp_cmd.return_value = {'cookies': [

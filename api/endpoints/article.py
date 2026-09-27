@@ -217,7 +217,7 @@ def _cookie_from_header(value, url):
 
 CDP_COOKIE_KEYS = {
     'name', 'value', 'url', 'domain', 'path', 'secure', 'httpOnly', 'sameSite',
-    'expires', 'priority', 'sourceScheme', 'sourcePort', 'partitionKey',
+    'expires', 'priority', 'sourcePort', 'partitionKey',
 }
 
 
@@ -235,7 +235,13 @@ def cookies_to_cdp(cookies, url, cookie_headers=()):
             host_only = not domain.startswith('.')
         if host_only or not domain:
             item.pop('domain', None)
-            item['url'] = _origin(url) + item['path']
+            host = (domain or urlparse(url).hostname).lstrip('.')
+            try:
+                if urlparse('https://' + host).hostname != host:
+                    raise RequestError('invalid cookie domain')
+            except ValueError:
+                raise RequestError('invalid cookie domain')
+            item['url'] = f'{urlparse(url).scheme}://{host}' + item['path']
         else:
             item.pop('url', None)
         if cookie.get('session') or item.get('expires', 0) == -1:
