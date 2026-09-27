@@ -173,9 +173,30 @@ curl -X GET "http://localhost:3000/api/article?url=https://example.com&user-scri
 
 ## API Endpoints
 
-### GET /api/article
+### GET /api/article and POST /api/article
 
-Fetches article content and metadata from a specified URL using SeleniumBase.
+Fetches article content and metadata from a specified URL using SeleniumBase. GET remains
+compatible for non-sensitive options. Cookies, credentials, and extra headers are accepted
+only in POST JSON so they cannot leak through query-string logs. POST body options take
+precedence over duplicate query options (the query URL must not conflict with a body URL).
+Sensitive options are never returned in `query` and make the request non-cacheable.
+
+Example JSON payload (illustrative values only):
+
+```json
+{
+  "url": "https://example.com/article",
+  "user-agent": "ExampleBrowser/1.0",
+  "locale": "en-GB",
+  "timezone": "Europe/London",
+  "cookies": [{"name": "session", "value": "redacted", "domain": "example.com", "path": "/", "secure": true, "httpOnly": true}],
+  "extra-http-headers": {"X-Example": "redacted"},
+  "http-credentials": {"username": "reader", "password": "redacted"},
+  "return-cookies": true
+}
+```
+
+Cookie and credential values are deliberately redacted in this documentation.
 
 **Parameters:**
 
@@ -211,8 +232,10 @@ All parameters except `url` have default values that can be set via environment 
 | `user-agent` | Specific user agent. It's better to use the `device` parameter instead of specifying it explicitly. | | `DEFAULT_USER_AGENT` |
 | `locale` | Specify user locale, for example en-GB, de-DE, etc. Locale will affect navigator.language value, Accept-Language request header value as well as number and date formatting rules. | | `DEFAULT_LOCALE` |
 | `timezone` | Changes the timezone of the context. See ICU's metaZones.txt for a list of supported timezone IDs. | | `DEFAULT_TIMEZONE` |
-| `http-credentials` | Credentials for HTTP authentication (string containing username and password separated by a colon, e.g. `username:password`). | | `DEFAULT_HTTP_CREDENTIALS` |
-| `extra-http-headers` | Contains additional HTTP headers to be sent with every request. Example: `X-API-Key:123456;X-Auth-Token:abcdef`. | | `DEFAULT_EXTRA_HTTP_HEADERS` |
+| `http-credentials` | HTTP authentication credentials as `{\"username\":\"reader\",\"password\":\"redacted\"}` in POST JSON; a legacy `username:password` string is accepted in the JSON body or server environment, never the query string. | | `DEFAULT_HTTP_CREDENTIALS` |
+| `extra-http-headers` | Additional headers as a POST JSON object; a legacy `X-API-Key:...;X-Auth-Token:...` string is accepted in the JSON body or server environment. A `Cookie` entry becomes browser cookies. | | `DEFAULT_EXTRA_HTTP_HEADERS` |
+| `cookies` | POST-only list of structured browser cookies (`name`, `value`, domain/path and cookie flags). | | - |
+| `return-cookies` | Return the browser's post-navigation cookie snapshot. Sensitive requests are not cached. | `false` | - |
 
 **Examples:**
 

@@ -38,10 +38,15 @@ DEFAULT_TIMEOUT = int(os.getenv('DEFAULT_TIMEOUT', '60000'))
 DEFAULT_WAIT_UNTIL = os.getenv('DEFAULT_WAIT_UNTIL', 'domcontentloaded')
 DEFAULT_SLEEP = int(os.getenv('DEFAULT_SLEEP', '0'))
 DEFAULT_RESOURCE = os.getenv('DEFAULT_RESOURCE', '')
-DEFAULT_VIEWPORT_WIDTH = os.getenv('DEFAULT_VIEWPORT_WIDTH', '')
-DEFAULT_VIEWPORT_HEIGHT = os.getenv('DEFAULT_VIEWPORT_HEIGHT', '')
-DEFAULT_SCREEN_WIDTH = os.getenv('DEFAULT_SCREEN_WIDTH', '')
-DEFAULT_SCREEN_HEIGHT = os.getenv('DEFAULT_SCREEN_HEIGHT', '')
+def _optional_int_env(name):
+    value = os.getenv(name, '').strip()
+    return int(value) if value else None
+
+
+DEFAULT_VIEWPORT_WIDTH = _optional_int_env('DEFAULT_VIEWPORT_WIDTH')
+DEFAULT_VIEWPORT_HEIGHT = _optional_int_env('DEFAULT_VIEWPORT_HEIGHT')
+DEFAULT_SCREEN_WIDTH = _optional_int_env('DEFAULT_SCREEN_WIDTH')
+DEFAULT_SCREEN_HEIGHT = _optional_int_env('DEFAULT_SCREEN_HEIGHT')
 DEFAULT_DEVICE = os.getenv('DEFAULT_DEVICE', 'Desktop Chrome')
 DEFAULT_SCROLL_DOWN = int(os.getenv('DEFAULT_SCROLL_DOWN', '0'))
 DEFAULT_IGNORE_HTTPS_ERRORS = os.getenv('DEFAULT_IGNORE_HTTPS_ERRORS', 'true').lower() == 'true'

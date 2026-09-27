@@ -16,12 +16,16 @@ def register_routes(app):
             'version': '1.0.0',
             'endpoints': {
                 '/api/article': {
-                    'method': 'GET',
+                    'method': 'GET or POST',
                     'description': 'Fetch HTML content from a URL',
                     'parameters': {
-                        'url': 'The URL to fetch (required)'
+                        'url': 'The URL to fetch (required)',
+                        'cookies': 'POST-only structured browser cookies',
+                        'return-cookies': 'POST/GET boolean; return the browser cookie snapshot',
+                        'extra-http-headers': 'POST JSON object (or legacy string in the body)',
+                        'http-credentials': 'POST JSON object (or legacy string in the body)'
                     },
-                    'example': '/api/article?url=https://en.wikipedia.org/wiki/web_scraping'
+                    'example': '/api/article?url=https://example.com'
                 },
                 '/health': {
                     'method': 'GET',
