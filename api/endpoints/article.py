@@ -581,9 +581,8 @@ def register_routes(app, cache_dir, user_scripts_dir, screenshots_dir,
         html_content = ''
         final_url = options['url']
         try:
-            is_chromium = os.path.exists('/usr/bin/chromium-browser')
             # SeleniumBase UC uses a separate CDP connection that cannot service
-            # Fetch/Network events. Use standard Chrome only for options that need
+            # Fetch/Network events. Use standard mode only for options that need
             # event callbacks; ordinary anti-bot/cookie scrapes keep UC mode.
             needs_event_cdp = bool(
                 options['resource'] or options['credentials']
@@ -591,13 +590,15 @@ def register_routes(app, cache_dir, user_scripts_dir, screenshots_dir,
             )
             driver_kwargs = {
                 'browser': 'chrome', 'headless': True,
-                'uc': not is_chromium and not needs_event_cdp,
+                'uc': not needs_event_cdp,
                 'incognito': options['incognito'],
                 'page_load_strategy': {
                     'load': 'normal', 'domcontentloaded': 'eager',
                     'commit': 'none', 'networkidle': 'none',
                 }[options['wait-until']],
             }
+            if os.path.exists('/usr/bin/chromium'):
+                driver_kwargs.update(binary_location='/usr/bin/chromium', driver_version='keep')
             preset = DEVICE_PRESETS[options['device']]
             if options['user-agent'] or preset.get('user_agent'):
                 driver_kwargs['agent'] = options['user-agent'] or preset['user_agent']

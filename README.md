@@ -7,12 +7,12 @@ and response format so it should be interchangeable with it.
 
 ## Browsers
 
-The `amd64` docker image includes `Chrome` pre-installed. This is the preferred browser
-as it supports SeleniumBase's full feature set, specifically the [UC Mode](https://seleniumbase.io/help_docs/uc_mode/)
-which is better for web scraping.
-
-The `arm64` docker image includes `Chromium` pre-installed which does not support 
-UC Mode, so it might not be as reliable as the `amd64` image for scraping.
+The default `amd64` image includes Chrome; the `arm64` image includes Chromium.
+The separate `Dockerfile.alpine` uses Alpine's Chromium and matching ChromeDriver.
+Ordinary requests use SeleniumBase [UC Mode](https://seleniumbase.io/help_docs/uc_mode/)
+(including verified Alpine Chromium); requests requiring CDP event callbacks
+(`networkidle`, `commit`, resource filtering or HTTP credentials) use standard
+browser mode. UC compatibility on the `arm64` image has not been verified.
 
 ## Prebuilt Images ![Docker Image Version](https://img.shields.io/docker/v/jez500/seleniumbase-scrapper?style=flat)
 

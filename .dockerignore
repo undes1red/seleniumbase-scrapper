@@ -1,0 +1,10 @@
+.git
+.kilo
+.pytest_cache
+**/__pycache__
+**/*.pyc
+.env*
+api/cache
+api/screenshots
+api/user_scripts/*
+!api/user_scripts/example-remove-ads.js

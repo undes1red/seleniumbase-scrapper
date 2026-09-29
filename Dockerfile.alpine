@@ -1,0 +1,38 @@
+FROM python:3.12-alpine3.22
+
+ENV PYTHONUNBUFFERED=1 PYTHONIOENCODING=UTF-8
+ENV TZ=America/New_York
+
+RUN apk add --no-cache \
+    bash \
+    chromium \
+    chromium-chromedriver \
+    font-noto \
+    font-noto-emoji \
+    fontconfig \
+    tini \
+    ttf-dejavu \
+    tzdata \
+    xvfb-run
+
+ENV CHROME_BIN=/usr/bin/chromium
+ENV SE_CHROMIUM_PATH=/usr/bin/chromium
+ENV SE_DRIVER_PATH=/usr/bin/chromedriver
+
+ARG SELENIUMBASE_VERSION=4.44.10
+# Use Alpine's matching musl ChromeDriver; SeleniumBase's default download is glibc-linked.
+RUN pip install --no-cache-dir --upgrade pip setuptools wheel && \
+    pip install --no-cache-dir "seleniumbase==${SELENIUMBASE_VERSION}" pyautogui flask beautifulsoup4 pytest pytest-mock && \
+    ln -s /usr/bin/chromedriver "$(python3 -c 'from pathlib import Path; import seleniumbase; print(Path(seleniumbase.__file__).parent / "drivers/chromedriver")')"
+
+COPY api/docker-entrypoint-api.sh /
+RUN chmod +x /docker-entrypoint-api.sh
+COPY api /SeleniumBase/api/
+COPY scripts /SeleniumBase/scripts
+RUN mkdir -p /SeleniumBase/api/cache /SeleniumBase/api/screenshots /SeleniumBase/api/user_scripts && \
+    chmod -R 755 /SeleniumBase/api
+WORKDIR /SeleniumBase
+
+EXPOSE 3000
+ENTRYPOINT ["/sbin/tini", "--", "/docker-entrypoint-api.sh"]
+CMD ["/bin/bash"]
